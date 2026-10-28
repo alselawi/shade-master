@@ -55,14 +55,13 @@ class LabColor {
 /// print(lab); // Lab(L: 53.24, a: 80.09, b: 67.20)
 /// ```
 LabColor rgbToLab(Color color) {
-  // Extract RGB using efficient bit operations
+  // Color.r, .g and .b are already normalized to 0.0 - 1.0
   final double r = color.r;
   final double g = color.g;
   final double b = color.b;
 
   // Convert sRGB to linear RGB with gamma correction
-  double srgbToLinear(double value) {
-    final normalized = value / 255.0;
+  double srgbToLinear(double normalized) {
     return ((normalized <= 0.04045) ? normalized / 12.92 : math.pow((normalized + 0.055) / 1.055, 2.4)).toDouble();
   }
 

@@ -25,7 +25,8 @@ class PrimaryButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(2), // Sharper corners
         ),
         padding: EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-        textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        // Based on the theme so the app font (with its Arabic glyphs) is kept.
+        textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 16, fontWeight: FontWeight.w600),
         elevation: 0, // Fluent UI buttons are usually flat
       ),
     );

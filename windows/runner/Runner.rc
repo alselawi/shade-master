@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "app.apexo" "\0"
-            VALUE "FileDescription", "shades" "\0"
+            VALUE "CompanyName", "com.alkazem" "\0"
+            VALUE "FileDescription", "Dental Case" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "shades" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2025 Apexo. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2025 Dr. Ali A. Saleem, 2026 Dental Case contributors. MIT License." "\0"
             VALUE "OriginalFilename", "shades.exe" "\0"
-            VALUE "ProductName", "shades" "\0"
+            VALUE "ProductName", "Dental Case" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

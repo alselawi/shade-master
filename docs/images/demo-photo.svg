@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600" viewBox="0 0 1200 1600">
+  <defs>
+    <linearGradient id="gum" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8E3B46"/><stop offset="0.45" stop-color="#B85A63"/><stop offset="1" stop-color="#5E1F28"/>
+    </linearGradient>
+    <linearGradient id="tooth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#D9C39B"/><stop offset="0.35" stop-color="#E4D3B2"/><stop offset="0.85" stop-color="#E9DECA"/><stop offset="1" stop-color="#CFD3D6"/>
+    </linearGradient>
+    <linearGradient id="a1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E6D7B8"/><stop offset="1" stop-color="#EFE6D6"/></linearGradient>
+    <linearGradient id="a2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#DBC59D"/><stop offset="1" stop-color="#E8DCC6"/></linearGradient>
+    <linearGradient id="a3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D0B484"/><stop offset="1" stop-color="#DECDAA"/></linearGradient>
+    <linearGradient id="a35" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C6A46F"/><stop offset="1" stop-color="#D6C099"/></linearGradient>
+    <radialGradient id="glare" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.9"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1200" height="1600" fill="url(#gum)"/>
+  <rect y="1080" width="1200" height="520" fill="#3A1218"/>
+  <!-- Two upper central incisors -->
+  <path d="M 250 300 Q 250 220 330 215 L 540 215 Q 590 220 590 300 L 575 820 Q 565 900 480 905 L 345 905 Q 265 900 262 820 Z" fill="url(#tooth)"/>
+  <path d="M 610 300 Q 610 220 660 215 L 870 215 Q 950 220 950 300 L 938 820 Q 935 900 855 905 L 720 905 Q 635 900 625 820 Z" fill="url(#tooth)"/>
+  <ellipse cx="400" cy="420" rx="45" ry="28" fill="url(#glare)"/>
+  <!-- Shade tabs on their holders -->
+  <g font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="bold" fill="#333" text-anchor="middle">
+    <rect x="150" y="1120" width="180" height="330" rx="70" fill="url(#a1)"/><rect x="215" y="1450" width="50" height="110" fill="#9AA0A6"/><text x="240" y="1540" fill="#FFF">A1</text>
+    <rect x="400" y="1120" width="180" height="330" rx="70" fill="url(#a2)"/><rect x="465" y="1450" width="50" height="110" fill="#9AA0A6"/><text x="490" y="1540" fill="#FFF">A2</text>
+    <rect x="650" y="1120" width="180" height="330" rx="70" fill="url(#a3)"/><rect x="715" y="1450" width="50" height="110" fill="#9AA0A6"/><text x="740" y="1540" fill="#FFF">A3</text>
+    <rect x="900" y="1120" width="180" height="330" rx="70" fill="url(#a35)"/><rect x="965" y="1450" width="50" height="110" fill="#9AA0A6"/><text x="990" y="1540" fill="#FFF">A3.5</text>
+  </g>
+  <text x="600" y="80" font-family="Arial, Helvetica, sans-serif" font-size="36" fill="#FFFFFF" fill-opacity="0.8" text-anchor="middle">DEMO IMAGE · generated, not a patient</text>
+</svg>

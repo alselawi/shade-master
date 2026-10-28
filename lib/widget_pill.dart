@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 class Pill extends StatelessWidget {
   final String label;
   final VoidCallback onClose;
+  final VoidCallback? onTap;
   final Color? color;
 
-  const Pill({super.key, required this.label, required this.onClose, this.color});
+  const Pill({super.key, required this.label, required this.onClose, this.onTap, this.color});
 
   @override
   Widget build(BuildContext context) {
     final c = color ?? Colors.black38;
-    return Container(
+    final pill = Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
       decoration: BoxDecoration(
         color: c,
@@ -30,7 +31,7 @@ class Pill extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.all(1),
               decoration: BoxDecoration(
-                color: c.withValues(blue: c.b + 30, red: c.r + 30, green: c.g + 30),
+                color: Color.lerp(c, Colors.white, 0.3),
                 borderRadius: BorderRadius.circular(3),
               ),
               child: const Icon(
@@ -43,5 +44,7 @@ class Pill extends StatelessWidget {
         ],
       ),
     );
+    if (onTap == null) return pill;
+    return GestureDetector(onTap: onTap, child: pill);
   }
 }

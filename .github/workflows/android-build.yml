@@ -1,0 +1,85 @@
+name: Android build
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: 3.47.8
+  FLUTTER_SHA256: baf7dcc5a3dbba60fe863bf493a6cf203195621f7786eaa5a1bba02cd0d87dd2
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      # Secrets cannot be used in `if:` directly. Without them the build is signed with the debug key.
+      HAS_RELEASE_KEY: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install Flutter ${{ env.FLUTTER_VERSION }}
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/flutter.tar.xz" \
+            "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz"
+          echo "${FLUTTER_SHA256}  $RUNNER_TEMP/flutter.tar.xz" | sha256sum -c -
+          tar -xJf "$RUNNER_TEMP/flutter.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+
+      - run: flutter --version
+      - run: flutter pub get --enforce-lockfile
+      - run: flutter analyze
+      - run: dart format --output=none --set-exit-if-changed lib test tool
+      - run: flutter test
+
+      - name: Configure release signing
+        if: env.HAS_RELEASE_KEY == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          {
+            echo "storeFile=$RUNNER_TEMP/release.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+
+      - run: flutter build apk --release
+      - run: flutter build appbundle --release
+
+      - name: Show APK details
+        run: |
+          apk=build/app/outputs/flutter-apk/app-release.apk
+          build_tools="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)"
+          ls -l "$apk" build/app/outputs/bundle/release/app-release.aab
+          "${build_tools}aapt2" dump badging "$apk" | grep -E "^(package|minSdkVersion|sdkVersion|targetSdkVersion|application-label|native-code)"
+          "${build_tools}aapt2" dump permissions "$apk"
+          # minSdk 24 means v2+ signatures only, which keytool cannot read.
+          "${build_tools}apksigner" verify --print-certs "$apk" | grep -E "certificate (DN|SHA-256)"
+          unzip -v "$apk" "lib/*"
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: dental-case-release
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+          retention-days: 14

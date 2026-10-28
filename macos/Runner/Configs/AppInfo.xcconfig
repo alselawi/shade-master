@@ -8,7 +8,7 @@
 PRODUCT_NAME = shades
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = app.apexo.shadesmaster
+PRODUCT_BUNDLE_IDENTIFIER = com.alkazem.dentalcase
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2025 Apexo. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2025 Dr. Ali A. Saleem, 2026 Dental Case contributors. MIT License.

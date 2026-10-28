@@ -1,5 +1,5 @@
 name: shadesmaster
-description: "Helping dentists to pick their tooth shades"
+description: "Tooth shade card and dental lab order, based on Shade Master."
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -16,20 +16,47 @@ dependencies:
   convex_hull: ^1.1.2
   vector_math: ^2.1.4
   hugeicons: ^0.0.11
-
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  path_provider: ^2.1.6
+  pdf: ^3.13.1
+  printing: ^5.15.1
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.3
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  image_picker_platform_interface: ^2.11.2
 
+# Regenerate with: dart run flutter_launcher_icons (sources in assets/icon, drawn from app_icon.svg)
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon/app_icon.png"
+  image_path_ios: "assets/icon/app_icon_ios.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#0B7FB5"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"
+  # The foreground already keeps the artwork inside the safe zone.
+  adaptive_icon_foreground_inset: 0
+  min_sdk_android: 24
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - assets/icon/app_icon.png
+    - assets/fonts/IBMPlexSansArabic-LICENSE.txt
+    - assets/fonts/NotoSans-LICENSE.txt
+  fonts:
+    - family: IBMPlexSansArabic
+      fonts:
+        - asset: assets/fonts/IBMPlexSansArabic-Regular.ttf
+        - asset: assets/fonts/IBMPlexSansArabic-Bold.ttf
+          weight: 700
+    # Only the Greek capital delta, for "ΔE00" (IBM Plex Sans Arabic has no Greek).
+    - family: NotoSansDelta
+      fonts:
+        - asset: assets/fonts/NotoSans-Delta.ttf

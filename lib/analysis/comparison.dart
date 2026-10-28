@@ -1,3 +1,6 @@
+// The CIEDE2000 terms keep the names of the published formula (L', C', h', S_L ...).
+// ignore_for_file: non_constant_identifier_names, constant_identifier_names
+
 import 'dart:math' as math;
 import 'package:shadesmaster/utils/rgb_to_lab.dart';
 

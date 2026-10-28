@@ -1,11 +1,11 @@
 {
-    "name": "shades",
-    "short_name": "shades",
+    "name": "Dental Case",
+    "short_name": "Dental Case",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Tooth shade card and dental lab order.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

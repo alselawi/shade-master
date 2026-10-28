@@ -1,96 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Shade Master - Shade Matching for Dentists</title>
-		<script src="https://cdn.tailwindcss.com"></script>
-		<link
-			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap"
-			rel="stylesheet"
-		/>
+		<title>Dental Case · بطاقة الحالة</title>
+		<meta name="description" content="بطاقة لون وطلب مخبري لطبيب الأسنان: مطابقة لون الأسنان من صورة وتصدير طلب المخبر PDF." />
+		<link rel="icon" href="assets/icon/app_icon.png" />
 		<style>
+			:root {
+				--accent: #0078d4;
+				--ink: #1f2937;
+				--muted: #5f6368;
+				--bg: #f4f8fb;
+			}
+			* { box-sizing: border-box; }
 			body {
-				font-family: "Inter", sans-serif;
-				background: linear-gradient(135deg, #f4fafe, #e0f1ff);
-				overflow-x: hidden;
+				margin: 0;
+				font-family: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+				color: var(--ink);
+				background: var(--bg);
+				line-height: 1.7;
 			}
-
-			.glass {
-				background: rgba(255, 255, 255, 0.7);
-				backdrop-filter: blur(16px);
-				border: 1px solid rgba(255, 255, 255, 0.4);
+			header {
+				background: linear-gradient(135deg, #0fa3a3, #0063b8);
+				color: #fff;
+				padding: 48px 16px;
+				text-align: center;
 			}
-
-			.triangle {
-				clip-path: polygon(0 0, 100% 5%, 100% 100%, 0% 100%);
-			}
-
-			.particles::before {
-				content: "";
-				position: absolute;
-				inset: 0;
-				background: url("https://www.transparenttextures.com/patterns/cubes.png");
-				opacity: 0.05;
-				pointer-events: none;
-			}
+			header img { width: 112px; height: 112px; border-radius: 24px; }
+			h1 { margin: 12px 0 4px; font-size: 2.2rem; }
+			header p { margin: 0 auto; max-width: 640px; font-size: 1.15rem; }
+			main { max-width: 1040px; margin: 0 auto; padding: 32px 16px; }
+			.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+			.shots figure { margin: 0; background: #fff; border-radius: 16px; padding: 8px; box-shadow: 0 4px 16px rgba(0, 43, 79, 0.08); }
+			.shots img { width: 100%; border-radius: 10px; display: block; }
+			.shots figcaption { text-align: center; color: var(--muted); font-size: 0.9rem; padding-top: 6px; }
+			ol li { margin-bottom: 6px; }
+			.note { color: var(--muted); font-size: 0.95rem; }
+			.button { display: inline-block; background: #fff; color: var(--accent); padding: 10px 22px; border-radius: 999px; font-weight: bold; text-decoration: none; margin-top: 16px; }
+			footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 24px 16px 40px; }
+			footer a { color: var(--accent); }
 		</style>
 	</head>
-
-	<body class="relative particles">
-		<!-- Header Section -->
-		<section class="relative w-full triangle">
-			<div
-				class="max-w-6xl mx-auto px-6 py-20 lg:py-28 flex flex-col-reverse lg:flex-row items-center gap-12"
-			>
-				<!-- Text -->
-				<div class="lg:w-1/2 z-10">
-					<h1 class="text-5xl font-extrabold text-blue-800 leading-tight mb-4">
-						Shade Master
-					</h1>
-					<p class="text-lg text-gray-700 mb-6">
-						A smart companion for dentists to choose accurate tooth shades for
-						prosthetics. Built for clinical precision, made for simplicity.
-					</p>
-					<ul class="mb-6 space-y-2 text-gray-600">
-						<li>🦷 Clinical-grade shade matching</li>
-						<li>📱 Works entirely offline</li>
-						<li>🎯 Trusted by dental professionals</li>
-					</ul>
-					<a
-						href="https://raw.githubusercontent.com/alselawi/shade-master/refs/heads/main/release/app-release.apk"
-						download
-						class="inline-block mt-4 bg-blue-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-700 transition font-semibold"
-					>
-						📥 Download APK
-					</a>
-					<p class="text-sm mt-2 text-gray-500">
-						Not available on Play Store. Not available on iOS.
-					</p>
-				</div>
-
-				<!-- Image -->
-				<div class="lg:w-1/2 flex justify-center z-10">
-					<div
-						class="w-[280px] h-[560px] rounded-[2rem] glass shadow-xl flex items-center justify-center overflow-hidden"
-					>
-						<img
-							src="screenshot.png"
-							alt="Shade Master app screenshot"
-							class="w-full h-full object-cover"
-						/>
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- Footer -->
-		<footer class="text-center text-gray-500 text-sm py-6">
-			<p>
-				<a href="https://github.com/alselawi/shade-master">Github Repository</a>
-				| <a href="https://mit-license.org/">MIT License</a>
-			</p>
-			&copy; 2025 Shade Master - Developed by Dr. Ali A. Saleem.
+	<body>
+		<header>
+			<img src="assets/icon/app_icon.png" alt="أيقونة التطبيق" />
+			<h1>بطاقة الحالة · Dental Case</h1>
+			<p>بطاقة لون وطلب مخبري لطبيب الأسنان: يحدد أقرب لون من صورة واحدة، ويصدّر طلب المخبر ملف PDF.</p>
+			<a class="button" href="https://github.com/ahmadalkazem/shade-master/releases">تنزيل التطبيق (أندرويد)</a>
+		</header>
+		<main>
+			<section class="shots">
+				<figure><img src="docs/images/screen-home.png" alt="الشاشة الرئيسية" /><figcaption>الشاشة الرئيسية</figcaption></figure>
+				<figure><img src="docs/images/screen-workspace.png" alt="تحديد الأسنان والألوان" /><figcaption>تحديد الأسنان والألوان</figcaption></figure>
+				<figure><img src="docs/images/screen-results.png" alt="نتائج المطابقة" /><figcaption>نتائج المطابقة بفرق ΔE00</figcaption></figure>
+				<figure><img src="docs/images/screen-pdf.png" alt="طلب المخبر PDF" /><figcaption>طلب المخبر PDF</figcaption></figure>
+			</section>
+			<h2>كيف يعمل</h2>
+			<ol>
+				<li>صوّر الأسنان مع ألسنة دليل الألوان تحت الإضاءة نفسها.</li>
+				<li>حدّد مناطق الأسنان والألسنة بإصبعك وسمِّ كل لسان باسمه، مثل A2.</li>
+				<li>يرتّب التطبيق الألوان من الأقرب بمعادلة CIEDE2000، مع تقييم سريري لكل فرق.</li>
+				<li>أنشئ طلب المخبر: الأسنان بترقيم FDI، ونوع التعويض، والمادة، والألوان، والملاحظات، ثم شاركه PDF.</li>
+			</ol>
+			<p class="note">كل البيانات تبقى على الجهاز. التحليل تقدير من صورة ويجب تأكيده بالنظر. الصور المعروضة مأخوذة من صورة تجريبية مولّدة وليست لمريض.</p>
+		</main>
+		<footer>
+			مبني على <a href="https://github.com/alselawi/shade-master">Shade Master</a> للدكتور علي أ. سليم ·
+			<a href="LICENSE">رخصة MIT</a> ·
+			<a href="docs/privacy-policy.md">سياسة الخصوصية</a>
 		</footer>
 	</body>
 </html>

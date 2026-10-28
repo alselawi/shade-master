@@ -2,126 +2,106 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:shadesmaster/drawings.dart';
 import 'package:shadesmaster/utils/unit_8_img.dart';
 
-/// Extracts all unique colors from pixels within a polygonal region.
+/// Extracts the colors of the pixels within a polygonal region.
 ///
-/// This function finds the bounding box of the region, then tests each pixel
-/// within that box to see if it's inside the polygon. For pixels inside,
-/// it extracts the RGB color value.
+/// The polygon is given in image pixel coordinates. A pixel belongs to the
+/// region when its centre is inside the polygon (even-odd rule, so the
+/// self-intersecting shapes a finger can draw behave like the original
+/// ray-casting implementation).
 ///
-/// Time complexity: O(w * h * n) where w,h are bounding box dimensions and n is polygon vertices
-/// Space complexity: O(k) where k is the number of unique colors found
+/// The region is filled one row at a time (scanline): for each row the
+/// crossings with the polygon edges are computed once, and every pixel between
+/// a pair of crossings is inside. This is O(h * n + k) instead of testing every
+/// pixel of the bounding box against every edge.
 ///
-/// [pixels] RGBA pixel data in row-major order (4 bytes per pixel: R,G,B,A)
-/// [region] List of vertices defining the polygonal region
-/// [width] Width of the image in pixels
-/// [height] Height of the image in pixels
+/// When the region holds more than [maxSamples] pixels, an evenly spaced grid
+/// of them is taken instead, which keeps big regions on big photos fast
+/// without changing their color distribution.
 ///
-/// Returns a list of unique Color objects found within the region
-List<Color> getAllColorsFromRegion(Unit8Img unit8Img, RenderBox renderBox, Region region) {
+/// [unit8Img] RGBA pixel data in row-major order (4 bytes per pixel: R,G,B,A)
+/// [polygon] List of vertices defining the polygonal region
+///
+/// Returns a list of Color objects found within the region
+List<Color> getAllColorsFromRegion(Unit8Img unit8Img, List<Offset> polygon, {int maxSamples = 20000}) {
   final pixels = unit8Img.pixels;
   final width = unit8Img.width;
   final height = unit8Img.height;
 
   // Early returns for invalid input
-  if (region.offsets.isEmpty || pixels.isEmpty) return [];
+  if (polygon.length < 3 || pixels.isEmpty) return [];
   if (width <= 0 || height <= 0) return [];
 
   // Ensure we have enough pixel data (4 bytes per pixel for RGBA)
-  final expectedPixelCount = width * height * 4;
-  if (pixels.length < expectedPixelCount) return [];
+  if (pixels.length < width * height * 4) return [];
+
+  final spans = _scanlineSpans(polygon, width, height);
+
+  int total = 0;
+  for (int i = 0; i < spans.length; i += 3) {
+    total += spans[i + 2] - spans[i + 1] + 1;
+  }
+  if (total == 0) return [];
+
+  // Keep every `step`-th row and column when the region is too big.
+  final step = total > maxSamples ? math.sqrt(total / maxSamples).ceil() : 1;
 
   final List<Color> extractedColors = <Color>[];
-
-  final pixelOffsets = region.getPixelOffset(renderBox, unit8Img);
-
-  // Calculate bounding box of the region
-  final boundingBox = _calculateBoundingBox(pixelOffsets);
-
-  // Clamp bounding box to image dimensions for safety
-  final startX = math.max(0, boundingBox.left.floor());
-  final endX = math.min(width - 1, boundingBox.right.ceil());
-  final startY = math.max(0, boundingBox.top.floor());
-  final endY = math.min(height - 1, boundingBox.bottom.ceil());
-
-  // Pre-allocate Offset object to avoid repeated allocation in inner loop
-  Offset currentPoint = Offset(0, 0);
-
-  // Scan all pixels within the bounding box
-  for (int x = startX; x <= endX; x++) {
-    for (int y = startY; y <= endY; y++) {
-      // Reuse the same Offset object for better performance
-      currentPoint = Offset(x.toDouble(), y.toDouble());
-
-      if (_isPointInPolygon(currentPoint, pixelOffsets)) {
-        final color = _extractColorAtPixel(pixels, x, y, width);
-        if (color != null) {
-          extractedColors.add(color);
-        }
-      }
+  for (int i = 0; i < spans.length; i += 3) {
+    final y = spans[i];
+    if (y % step != 0) continue;
+    final startX = spans[i + 1];
+    final firstX = startX + (step - startX % step) % step;
+    for (int x = firstX; x <= spans[i + 2]; x += step) {
+      extractedColors.add(_extractColorAtPixel(pixels, x, y, width));
     }
   }
 
-  return extractedColors.toList();
+  return extractedColors;
 }
 
-/// Determines if a point is inside a polygon using the ray casting algorithm.
-///
-/// Uses the "even-odd rule" where a point is inside if a ray cast from the point
-/// to infinity crosses an odd number of polygon edges.
-///
-/// Time complexity: O(n) where n is the number of polygon vertices
-/// Space complexity: O(1)
-///
-/// [point] The point to test
-/// [polygon] List of vertices defining the polygon (must have at least 3 points)
-///
-/// Returns true if the point is inside the polygon, false otherwise
-bool _isPointInPolygon(Offset point, List<Offset> polygon) {
-  // Early return for invalid input
-  if (polygon.length < 3) return false;
+/// Returns the horizontal runs of pixels inside [polygon] as a flat list of
+/// `y, firstX, lastX` triplets, clamped to the image.
+Int32List _scanlineSpans(List<Offset> polygon, int width, int height) {
+  final boundingBox = _calculateBoundingBox(polygon);
+  final startY = math.max(0, (boundingBox.top - 0.5).floor());
+  final endY = math.min(height - 1, (boundingBox.bottom - 0.5).ceil());
 
-  bool isInside = false;
-  final int vertexCount = polygon.length;
+  final spans = <int>[];
+  final crossings = <double>[];
+  final vertexCount = polygon.length;
 
-  // Cache point coordinates to avoid repeated property access
-  final double px = point.dx;
-  final double py = point.dy;
+  for (int y = startY; y <= endY; y++) {
+    final double centreY = y + 0.5;
+    crossings.clear();
 
-  // Start with the last vertex as the previous vertex
-  int prevIndex = vertexCount - 1;
+    int prevIndex = vertexCount - 1;
+    for (int currentIndex = 0; currentIndex < vertexCount; currentIndex++) {
+      final Offset currentVertex = polygon[currentIndex];
+      final Offset prevVertex = polygon[prevIndex];
 
-  for (int currentIndex = 0; currentIndex < vertexCount; currentIndex++) {
-    final Offset currentVertex = polygon[currentIndex];
-    final Offset prevVertex = polygon[prevIndex];
-
-    // Cache vertex coordinates
-    final double currentY = currentVertex.dy;
-    final double prevY = prevVertex.dy;
-    final double currentX = currentVertex.dx;
-    final double prevX = prevVertex.dx;
-
-    // Check if the horizontal ray from the point crosses this edge
-    // Edge must straddle the horizontal line through the point
-    // Using > instead of >= for one vertex avoids double-counting shared vertices
-    final bool edgeStraddles = (currentY > py) != (prevY > py);
-
-    if (edgeStraddles) {
-      // Calculate x-coordinate where the edge intersects the horizontal ray
-      // Using the line equation: x = x1 + (x2-x1) * (y-y1) / (y2-y1)
-      final double intersectionX = prevX + (currentX - prevX) * (py - prevY) / (currentY - prevY);
-
-      // If intersection is to the right of the point, we crossed an edge
-      if (px < intersectionX) {
-        isInside = !isInside;
+      // Edge must straddle the horizontal line through the pixel centres.
+      // Using > for both ends avoids double-counting shared vertices.
+      if ((currentVertex.dy > centreY) != (prevVertex.dy > centreY)) {
+        crossings.add(
+          prevVertex.dx +
+              (currentVertex.dx - prevVertex.dx) * (centreY - prevVertex.dy) / (currentVertex.dy - prevVertex.dy),
+        );
       }
+      prevIndex = currentIndex;
     }
 
-    prevIndex = currentIndex;
+    crossings.sort();
+    for (int i = 0; i + 1 < crossings.length; i += 2) {
+      // Pixel x is inside when its centre x + 0.5 lies in [left, right).
+      final first = math.max(0, (crossings[i] - 0.5).ceil());
+      final last = math.min(width - 1, (crossings[i + 1] - 0.5).ceil() - 1);
+      if (last >= first) spans.addAll([y, first, last]);
+    }
   }
-  return isInside;
+
+  return Int32List.fromList(spans);
 }
 
 /// Calculates the axis-aligned bounding box of a list of points.
@@ -140,20 +120,10 @@ Rect _calculateBoundingBox(List<Offset> points) {
   // Skip the first point since we already used it for initialization
   for (int i = 1; i < points.length; i++) {
     final point = points[i];
-    final x = point.dx;
-    final y = point.dy;
-
-    if (x < minX) {
-      minX = x;
-    } else if (x > maxX) {
-      maxX = x;
-    }
-
-    if (y < minY) {
-      minY = y;
-    } else if (y > maxY) {
-      maxY = y;
-    }
+    minX = math.min(minX, point.dx);
+    maxX = math.max(maxX, point.dx);
+    minY = math.min(minY, point.dy);
+    maxY = math.max(maxY, point.dy);
   }
 
   return Rect.fromLTRB(minX, minY, maxX, maxY);
@@ -165,14 +135,8 @@ Rect _calculateBoundingBox(List<Offset> points) {
 /// [x] X coordinate of the pixel
 /// [y] Y coordinate of the pixel
 /// [width] Width of the image
-///
-/// Returns a Color object or null if the pixel is out of bounds
-Color? _extractColorAtPixel(Uint8List pixels, int x, int y, int width) {
+Color _extractColorAtPixel(Uint8List pixels, int x, int y, int width) {
   final pixelIndex = (y * width + x) * 4;
-
-  // Bounds check - ensure we can read R, G, B components
-  if (pixelIndex + 2 >= pixels.length) return null;
-
   return Color.fromARGB(
     255, // Full opacity - we're only extracting RGB values
     pixels[pixelIndex], // Red

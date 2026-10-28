@@ -1,4 +1,4 @@
-package app.apexo.shadesmaster
+package com.alkazem.dentalcase
 
 import io.flutter.embedding.android.FlutterActivity
 
